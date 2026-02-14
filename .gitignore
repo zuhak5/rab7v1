@@ -1,10 +1,10 @@
 # Monorepo files (kept locally but not deployed)
-.agent/
-admin_dashboard/
-config/
-docs/
-supabase/
-# scripts/
+/.agent/
+/admin_dashboard/
+/config/
+/docs/
+/supabase/
+/scripts/
 deno.json
 deno.lock
 main_from_prod.js
