@@ -4,7 +4,7 @@ admin_dashboard/
 config/
 docs/
 supabase/
-scripts/
+# scripts/
 deno.json
 deno.lock
 main_from_prod.js
