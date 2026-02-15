@@ -112,7 +112,7 @@ class HomeMainSheet extends StatelessWidget {
                   final tightLayout = constraints.maxHeight < 420;
                   final showRecentAndOffers = constraints.maxHeight > 380;
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       // Image 1 baseline: no "approx prices" info row on home.
                       if (walletLoading || profileLoading)
@@ -135,7 +135,7 @@ class HomeMainSheet extends StatelessWidget {
                           isError: true,
                         ),
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           Expanded(
                             child: DestinationInput(
@@ -197,8 +197,11 @@ class HomeMainSheet extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         _helperText(draft),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 11,
+                          height: 1.15,
                           fontWeight: FontWeight.w600,
                           color:
                               draft.destinationResolutionStatus ==
@@ -207,15 +210,28 @@ class HomeMainSheet extends StatelessWidget {
                               : colors.onSurfaceVariant.withValues(alpha: 0.9),
                         ),
                       ),
-                      if (draft.destinationResolutionStatus ==
-                          DestinationResolutionStatus.error)
-                        Align(
+                      // Reserve space for the retry affordance to prevent vertical "jumps".
+                      SizedBox(
+                        height: 36,
+                        child: Align(
                           alignment: AlignmentDirectional.centerEnd,
-                          child: TextButton(
-                            onPressed: onDestinationRetry,
-                            child: const Text('إعادة تحديد الوجهة'),
+                          child: IgnorePointer(
+                            ignoring: draft.destinationResolutionStatus !=
+                                DestinationResolutionStatus.error,
+                            child: Opacity(
+                              opacity:
+                                  draft.destinationResolutionStatus ==
+                                          DestinationResolutionStatus.error
+                                      ? 1
+                                      : 0,
+                              child: TextButton(
+                                onPressed: onDestinationRetry,
+                                child: const Text('إعادة تحديد الوجهة'),
+                              ),
+                            ),
                           ),
                         ),
+                      ),
                       SizedBox(height: metrics.mainSheetGap / 2),
                       Row(
                         children: <Widget>[
@@ -330,7 +346,7 @@ class _SavedPlaceCard extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
                     title,

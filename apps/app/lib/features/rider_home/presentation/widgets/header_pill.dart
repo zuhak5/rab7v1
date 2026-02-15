@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../spec/home_mobile_spec.dart';
+import '../spec/home_overlay_tuning.dart';
 
 /// Top header pill.
 ///
 /// Pixel contract (per 1.jpg):
 /// - Left: avatar
 /// - Center: pickup status text (tappable)
-/// - Right: settings/utility icon
+/// - Right: crosshair/target icon
 /// - No recenter button inside the pill
 class HeaderPill extends StatelessWidget {
   const HeaderPill({
@@ -29,58 +30,94 @@ class HeaderPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
+    final centerInset = HomeOverlayTuning.headerCenterHitInset;
+
     final trimmedAvatarUrl = avatarUrl?.trim();
     final resolvedAvatarUrl =
         trimmedAvatarUrl == null || trimmedAvatarUrl.isEmpty
             ? null
             : trimmedAvatarUrl;
 
+    // Match the Material 3 search-bar-like capsule geometry:
+    // - height 56dp
+    // - strong rounding (capsule)
+    // - subtle shadow
+    // Ref: M3 search specs list height 56dp and 16dp paddings.
+    // We'll keep the component height aligned with HomeMobileSpec.headerHeight
+    // and fine-tune internal paddings for screenshot parity.
     return Container(
       height: HomeMobileSpec.headerHeight,
       margin: const EdgeInsets.symmetric(
         horizontal: HomeMobileSpec.headerInnerHorizontalMargin,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: colors.outline.withValues(alpha: 0.6)),
-        boxShadow: HomeMobileSpec.elevation2,
+        // Image 1: almost no visible stroke; rely primarily on shadow.
+        border: Border.all(color: colors.outline.withValues(alpha: 0.14)),
+        // Softer than HomeMobileSpec.elevation1 for closer screenshot parity.
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.10),
+            offset: Offset(0, 2),
+            blurRadius: 10,
+          ),
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.05),
+            offset: Offset(0, 1),
+            blurRadius: 3,
+          ),
+        ],
       ),
-      child: Row(
+      // Pixel parity: keep center text visually centered regardless of
+      // left/right content widths by using a Stack.
+      child: Stack(
         children: <Widget>[
-          _AvatarButton(avatarUrl: resolvedAvatarUrl, onTap: onAvatarTap),
-          const SizedBox(width: 10),
-          Expanded(
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              // In 1.jpg the avatar sits slightly more inset than the default
+              // 12dp. These values were derived from measuring the crop.
+              padding: EdgeInsets.only(left: HomeOverlayTuning.headerAvatarPaddingLeft),
+              child: _AvatarButton(avatarUrl: resolvedAvatarUrl, onTap: onAvatarTap),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              // In 1.jpg the trailing icon sits a bit further from the edge.
+              padding: EdgeInsets.only(right: HomeOverlayTuning.headerTrailingIconPaddingRight),
+              child: _HeaderIconButton(
+                icon: Icons.gps_fixed,
+                onPressed: onSettingsTap,
+              ),
+            ),
+          ),
+          // Center tap target (kept away from avatar/icon hit targets).
+          Positioned.fill(
+            left: centerInset,
+            right: centerInset,
             child: Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: onPickupTap,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(999),
                 child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      locationStatus,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: colors.onSurface,
-                        height: 1.0,
-                      ),
+                  child: Text(
+                    locationStatus,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: HomeOverlayTuning.headerTextSize,
+                      fontWeight: FontWeight.w700,
+                      color: colors.onSurface,
+                      height: 1.0,
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          _IconCircleButton(
-            icon: Icons.gps_fixed_rounded,
-            onPressed: onSettingsTap,
           ),
         ],
       ),
@@ -108,11 +145,14 @@ class _AvatarButton extends StatelessWidget {
           height: 48,
           child: Center(
             child: Container(
-              width: 44,
-              height: 44,
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: colors.surfaceContainerHighest,
+                color: colors.surface,
+                border: Border.all(
+                  color: colors.outline.withValues(alpha: 0.35),
+                ),
                 image: avatarUrl == null
                     ? null
                     : DecorationImage(
@@ -123,7 +163,7 @@ class _AvatarButton extends StatelessWidget {
               child: avatarUrl == null
                   ? Icon(
                       Icons.person_rounded,
-                      size: 22,
+                      size: 18,
                       color: colors.onSurfaceVariant,
                     )
                   : null,
@@ -135,8 +175,8 @@ class _AvatarButton extends StatelessWidget {
   }
 }
 
-class _IconCircleButton extends StatelessWidget {
-  const _IconCircleButton({required this.icon, required this.onPressed});
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({required this.icon, required this.onPressed});
 
   final IconData icon;
   final VoidCallback onPressed;
@@ -154,7 +194,7 @@ class _IconCircleButton extends StatelessWidget {
           width: 48,
           height: 48,
           child: Center(
-            child: Icon(icon, size: 28, color: colors.onSurfaceVariant),
+            child: Icon(icon, size: HomeOverlayTuning.headerTrailingIconSize, color: colors.onSurfaceVariant),
           ),
         ),
       ),

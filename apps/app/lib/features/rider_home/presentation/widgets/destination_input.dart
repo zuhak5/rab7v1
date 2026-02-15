@@ -44,6 +44,8 @@ class _DestinationInputState extends State<DestinationInput> {
     super.initState();
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
+        // Close immediately to avoid one-frame overlay linger.
+        _removeOverlay();
         widget.onCloseSuggestions();
       }
     });
@@ -96,7 +98,10 @@ class _DestinationInputState extends State<DestinationInput> {
               // Tap-away to close. Keeps the home sheet layout stable (no jumps).
               GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTap: widget.onCloseSuggestions,
+                onTap: () {
+                  _removeOverlay();
+                  widget.onCloseSuggestions();
+                },
                 child: const SizedBox.expand(),
               ),
               CompositedTransformFollower(
@@ -301,6 +306,7 @@ class _DestinationInputState extends State<DestinationInput> {
               }
             },
             textAlignVertical: TextAlignVertical.center,
+            strutStyle: const StrutStyle(fontSize: 16, height: 1.15, forceStrutHeight: true),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -350,19 +356,22 @@ class _DestinationInputState extends State<DestinationInput> {
                   width: 1,
                 ),
               ),
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                size: 22,
-                color: colors.primary,
+              prefixIcon: Padding(
+                // Keep ~12px leading padding between the field edge and the icon.
+                // See InputDecoration.prefixIcon docs.
+                padding: const EdgeInsetsDirectional.only(start: 12, end: 6),
+                child: Icon(
+                  Icons.search_rounded,
+                  size: 22,
+                  color: colors.primary,
+                ),
               ),
-              prefixIconConstraints:
-                  const BoxConstraints(minWidth: 44, minHeight: 44),
-              suffixIconConstraints:
-                  const BoxConstraints(minWidth: 44, minHeight: 44),
+              prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              suffixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               // Reserve suffix space to avoid text "jump" when the clear button
               // appears/disappears.
               suffixIcon: SizedBox(
-                width: 44,
+                width: 48,
                 child: hasText
                     ? IconButton(
                         onPressed: widget.onClear,

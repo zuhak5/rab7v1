@@ -117,20 +117,22 @@ class _SchedulePanelState extends State<SchedulePanel>
                       Text(
                         _headerLabel(),
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          height: 1.0,
+                          fontWeight: FontWeight.w800,
                           color: colors.primary,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 1),
                   Text(
                     _subLabel(),
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 11,
+                      height: 1.0,
                       fontWeight: FontWeight.w600,
-                      color: colors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant.withValues(alpha: 0.9),
                     ),
                   ),
                 ],

@@ -23,7 +23,14 @@ import '../widgets/rider_marker.dart';
 import '../widgets/rider_shell_layout.dart';
 
 class RiderHomePage extends ConsumerStatefulWidget {
-  const RiderHomePage({super.key});
+  final WidgetBuilder? mapBuilderOverride;
+  final bool skipMapInit;
+
+  const RiderHomePage({
+    super.key,
+    this.mapBuilderOverride,
+    this.skipMapInit = false,
+  });
 
   @override
   ConsumerState<RiderHomePage> createState() => _RiderHomePageState();
@@ -45,9 +52,11 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage> {
   @override
   void initState() {
     super.initState();
-    Future<void>.microtask(() async {
-      await ref.read(mapRepositoryProvider).ensureInitialized();
-    });
+    if (!widget.skipMapInit) {
+      Future<void>.microtask(() async {
+        await ref.read(mapRepositoryProvider).ensureInitialized();
+      });
+    }
   }
 
   @override
@@ -80,7 +89,9 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage> {
     _syncDestinationField(draft.destinationLabel);
 
     final mediaSize = MediaQuery.sizeOf(context);
-    final mediaPadding = MediaQuery.paddingOf(context);
+    // Use viewPadding (not padding) so layout doesn't reflow when the keyboard
+    // animates (padding is affected by viewInsets).
+    final mediaPadding = MediaQuery.viewPaddingOf(context);
     final metrics = HomeLayoutMetrics.fromViewport(
       size: mediaSize,
       safeArea: mediaPadding,
@@ -122,12 +133,13 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage> {
                 height: metrics.viewportHeight,
                 child: RiderShellLayout(
                   metrics: metrics,
-                  map: const IgnorePointer(
-                    child: RideMapWidget(
-                      myLocationEnabled: false,
-                      myLocationButtonEnabled: false,
-                      compassEnabled: false,
-                    ),
+                  map: IgnorePointer(
+                    child: widget.mapBuilderOverride?.call(context) ??
+                        const RideMapWidget(
+                          myLocationEnabled: false,
+                          myLocationButtonEnabled: false,
+                          compassEnabled: false,
+                        ),
                   ),
                   header: HeaderPill(
                     locationStatus: 'الالتقاط: موقعك الحالي',

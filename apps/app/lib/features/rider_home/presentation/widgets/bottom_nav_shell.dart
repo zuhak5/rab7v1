@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../spec/home_mobile_spec.dart';
+import '../spec/home_overlay_tuning.dart';
 import '../viewmodels/rider_home_state.dart';
 
 class BottomNavShell extends StatelessWidget {
@@ -18,7 +21,11 @@ class BottomNavShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final safeBottom = metrics?.safeBottomPadding ?? MediaQuery.paddingOf(context).bottom;
+    // Match the HTML spec: padding-bottom = max(24dp, safe-area-inset-bottom).
+    final safeBottom = metrics?.safeBottomPadding ??
+        // Use viewPadding so the bar doesn't "jump" when the keyboard animates.
+        // (padding can shrink when viewInsets grows.)
+        math.max(HomeMobileSpec.safeBottomMin, MediaQuery.viewPaddingOf(context).bottom);
     final compact = metrics?.isCompact ?? (MediaQuery.sizeOf(context).height < 700);
 
     return Container(
@@ -27,13 +34,13 @@ class BottomNavShell extends StatelessWidget {
         top: HomeMobileSpec.bottomNavTopPadding,
         left: HomeMobileSpec.bottomNavPaddingHorizontal,
         right: HomeMobileSpec.bottomNavPaddingHorizontal,
-        bottom: safeBottom.clamp(8.0, 22.0),
+        bottom: safeBottom,
       ),
       decoration: BoxDecoration(
         // Image 1: solid surface (no blur).
         color: colors.surface,
         border: Border(
-          top: BorderSide(color: colors.outline.withValues(alpha: 0.9)),
+          top: BorderSide(color: colors.outline.withValues(alpha: HomeOverlayTuning.navBorderAlpha)),
         ),
       ),
       child: Row(
@@ -90,72 +97,75 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    // Values tuned against 1.jpg (nav1_up.png crop):
+    // - Selected tab has a single elevated white disc (no tinted halo fill)
+    // - Disc visually ~55dp with a soft shadow, lifted above the baseline.
+    // nav1_up.png shows a prominent ~60dp disc, lifted above the label line.
+    // Micro-tuned for closer parity with nav1_up.png:
+    // - Slightly larger disc
+    // - Slightly less lift (disc appears closer to the bar baseline)
+    final kActiveDiscSize = HomeOverlayTuning.navActiveDiscSize;
+    final kActiveIconSize = HomeOverlayTuning.navActiveIconSize;
+    final kActiveLift = HomeOverlayTuning.navActiveLift;
+    final kInactiveIconSize = HomeOverlayTuning.navInactiveIconSize;
+    final kLabelGap = HomeOverlayTuning.navLabelGap;
+    final kLabelSize = HomeOverlayTuning.navLabelSize;
 
     return InkResponse(
       onTap: onTap,
-      radius: 36,
+      radius: 40,
       child: SizedBox(
-        height: compact ? 52 : 72,
+        height: compact ? 52 : 78,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             if (active && !compact)
               Transform.translate(
                 // Image 1: selected icon sits above baseline.
-                offset: const Offset(0, -14),
+                offset: Offset(0, -kActiveLift),
                 child: SizedBox(
-                  width: 72,
-                  height: 72,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      // Faint outer disc.
-                      Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colors.surfaceContainerHighest,
-                        ),
+                  width: kActiveDiscSize,
+                  height: kActiveDiscSize,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colors.surface,
+                      border: Border.all(
+                        // In the screenshot the disc edge is barely visible.
+                        color: colors.outline.withValues(alpha: 0.12),
                       ),
-                      // Inner elevated disc with border + shadow.
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colors.surface,
-                          border: Border.all(
-                            color: colors.outline.withValues(alpha: 0.85),
-                          ),
-                          boxShadow: const <BoxShadow>[
-                            BoxShadow(
-                              color: Color.fromRGBO(0, 0, 0, 0.14),
-                              blurRadius: 14,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
+                      boxShadow: const <BoxShadow>[
+                        BoxShadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.10),
+                          blurRadius: 18,
+                          offset: Offset(0, 7),
                         ),
-                        child: Icon(icon, size: 28, color: colors.primary),
-                      ),
-                    ],
+                        BoxShadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.06),
+                          blurRadius: 6,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(icon, size: kActiveIconSize, color: colors.primary),
                   ),
                 ),
               )
             else
               Icon(
                 icon,
-                size: compact ? 20 : 24,
+                size: compact ? 20 : kInactiveIconSize,
                 color: active ? colors.primary : colors.onSurfaceVariant,
               ),
-            SizedBox(height: compact ? 2 : 4),
+            // Slightly tighter gap like nav1_up.png.
+            SizedBox(height: compact ? 2 : kLabelGap),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: compact ? 9 : 12,
+                fontSize: compact ? 9 : kLabelSize,
                 fontWeight: active ? FontWeight.w800 : FontWeight.w600,
                 color: active ? colors.primary : colors.onSurfaceVariant,
                 height: 1.0,
