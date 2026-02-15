@@ -92,14 +92,14 @@ class _SchedulePanelState extends State<SchedulePanel>
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
-                  color: colors.primary.withValues(alpha: 0.24),
-                  width: 2,
+                  color: colors.outline.withValues(alpha: 0.9),
+                  width: 1,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 backgroundColor: colors.surface,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                padding: EdgeInsets.zero,
               ),
               onPressed: widget.onToggle,
               child: Column(
@@ -108,12 +108,16 @@ class _SchedulePanelState extends State<SchedulePanel>
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Icon(Icons.schedule_rounded, size: 18, color: colors.primary),
+                      Icon(
+                        Icons.schedule_rounded,
+                        size: 16,
+                        color: colors.primary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         _headerLabel(),
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: colors.primary,
                         ),
@@ -124,7 +128,7 @@ class _SchedulePanelState extends State<SchedulePanel>
                   Text(
                     _subLabel(),
                     style: TextStyle(
-                      fontSize: 9,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: colors.onSurfaceVariant,
                     ),

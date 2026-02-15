@@ -1,6 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 
-import '../../../rider_rides/domain/entities/ride_request.dart';
 import '../../domain/entities/saved_place.dart';
 import '../spec/home_mobile_spec.dart';
 import '../viewmodels/rider_home_state.dart';
@@ -15,7 +14,6 @@ class HomeMainSheet extends StatelessWidget {
     required this.homeState,
     required this.destinationController,
     required this.savedPlaces,
-    required this.activeRequest,
     required this.walletLoading,
     required this.profileLoading,
     required this.walletHasError,
@@ -40,7 +38,6 @@ class HomeMainSheet extends StatelessWidget {
     required this.onWorkTap,
     required this.onWorkLongPress,
     required this.onRecentPlaceTap,
-    required this.onOpenActiveRequest,
     super.key,
   });
 
@@ -48,7 +45,6 @@ class HomeMainSheet extends StatelessWidget {
   final RiderHomeState homeState;
   final TextEditingController destinationController;
   final Map<String, SavedPlaceEntity> savedPlaces;
-  final RideRequestEntity? activeRequest;
   final bool walletLoading;
   final bool profileLoading;
   final bool walletHasError;
@@ -73,7 +69,6 @@ class HomeMainSheet extends StatelessWidget {
   final VoidCallback onWorkTap;
   final VoidCallback onWorkLongPress;
   final ValueChanged<String> onRecentPlaceTap;
-  final VoidCallback onOpenActiveRequest;
 
   @override
   Widget build(BuildContext context) {
@@ -119,52 +114,7 @@ class HomeMainSheet extends StatelessWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Wrap(
-                              spacing: 6,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  'الأسعار تقريبية',
-                                  style: TextStyle(
-                                    fontSize: HomeMobileSpec.infoRowFontSize,
-                                    fontWeight: FontWeight.w600,
-                                    color: colors.onSurfaceVariant,
-                                  ),
-                                ),
-                                Container(
-                                  width: 3,
-                                  height: 3,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: colors.onSurfaceVariant.withValues(
-                                      alpha: 0.45,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  'آخر تحديث: الآن',
-                                  style: TextStyle(
-                                    fontSize: HomeMobileSpec.infoRowFontSize,
-                                    fontWeight: FontWeight.w600,
-                                    color: colors.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            Icons.info_outline_rounded,
-                            size: 18,
-                            color: colors.onSurfaceVariant.withValues(
-                              alpha: 0.8,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
+                      // Image 1 baseline: no "approx prices" info row on home.
                       if (walletLoading || profileLoading)
                         const _InfoBanner(
                           icon: SizedBox(
@@ -227,21 +177,28 @@ class HomeMainSheet extends StatelessWidget {
                           key: const ValueKey<String>(
                             'home_trip_options_button',
                           ),
-                          onPressed: draft.canRequestTrip ? onTripTap : null,
-                          child: const Text(
-                            'عرض خيارات الرحلة',
-                            style: TextStyle(
+                          // Image 1 shows this CTA as enabled (blue) even
+                          // before a destination is resolved.
+                          onPressed: onTripTap,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            textStyle: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
+                          child: const Text('عرض خيارات الرحلة'),
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _helperText(draft),
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color:
                               draft.destinationResolutionStatus ==
@@ -273,7 +230,7 @@ class HomeMainSheet extends StatelessWidget {
                               onLongPress: onHomeLongPress,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: _SavedPlaceCard(
                               icon: Icons.work_rounded,
@@ -292,15 +249,8 @@ class HomeMainSheet extends StatelessWidget {
                         RecentPlacesRow(onPlaceTap: onRecentPlaceTap),
                         SizedBox(height: metrics.mainSheetGap / 2),
                         SizedBox(
-                          height: tightLayout ? 208 : 220,
+                          height: tightLayout ? 204 : 214,
                           child: const OffersCarousel(compact: true),
-                        ),
-                      ],
-                      if (activeRequest != null && !tightLayout) ...<Widget>[
-                        const SizedBox(height: 10),
-                        _ActiveRequestBanner(
-                          status: activeRequest!.status,
-                          onOpen: onOpenActiveRequest,
                         ),
                       ],
                     ],
@@ -357,18 +307,11 @@ class _SavedPlaceCard extends StatelessWidget {
         constraints: const BoxConstraints(
           minHeight: HomeMobileSpec.cardMinHeight,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: colors.surface.withValues(alpha: 0.84),
+          color: colors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colors.outline.withValues(alpha: 0.9)),
-          boxShadow: const <BoxShadow>[
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.08),
-              blurRadius: 3,
-              offset: Offset(0, 1),
-            ),
-          ],
+          border: Border.all(color: colors.outline.withValues(alpha: 0.7)),
         ),
         child: Row(
           children: <Widget>[
@@ -379,10 +322,10 @@ class _SavedPlaceCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: colors.surface,
                 border: Border.all(
-                  color: colors.outline.withValues(alpha: 0.7),
+                  color: colors.outline.withValues(alpha: 0.55),
                 ),
               ),
-              child: Icon(icon, size: 18, color: colors.primary),
+              child: Icon(icon, size: 20, color: colors.primary),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -392,7 +335,7 @@ class _SavedPlaceCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: colors.onSurface,
                     ),
@@ -401,9 +344,9 @@ class _SavedPlaceCard extends StatelessWidget {
                     subtitle,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: colors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant.withValues(alpha: 0.95),
                     ),
                   ),
                 ],
@@ -460,35 +403,3 @@ class _InfoBanner extends StatelessWidget {
   }
 }
 
-class _ActiveRequestBanner extends StatelessWidget {
-  const _ActiveRequestBanner({required this.status, required this.onOpen});
-
-  final String status;
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.outline.withValues(alpha: 0.7)),
-      ),
-      child: Row(
-        children: <Widget>[
-          const Icon(Icons.local_taxi_rounded),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'طلب نشط: $status',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-            ),
-          ),
-          FilledButton.tonal(onPressed: onOpen, child: const Text('متابعة')),
-        ],
-      ),
-    );
-  }
-}

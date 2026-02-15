@@ -54,11 +54,11 @@ class HomeMobileSpec {
   static const double infoRowFontSize = 12;
 
   // Offers
-  static const double offersSectionHeight = 110;
+  static const double offersSectionHeight = 156;
   static const double offersCardWidthRatio = 0.66;
-  static const double offersCardMinWidth = 240;
-  static const double offersCardWidth = 260;
-  static const double offersCardHeight = 96;
+  static const double offersCardMinWidth = 220;
+  static const double offersCardWidth = 270;
+  static const double offersCardHeight = 92;
 
   // Font Sizes
   static const double tinyLabelSize = 10;
@@ -355,7 +355,7 @@ const List<HomeOfferMedia> kHomeOffers = <HomeOfferMedia>[
   HomeOfferMedia(
     title: 'توصيل غداء',
     subtitle: 'أسرع طلب خلال ٣٠ دقيقة',
-    badge: '٥٠٪ خصم',
+    badge: 'خصم %10',
     imageUrl:
         'https://lh3.googleusercontent.com/aida-public/AB6AXuDa1OpvziRdgaDhV6v6hl0PbA9QZjYRdiBfNiULWAE8ilF-58F94YX1_waUERsBmvzi6ooDXv7qKLLhCZgKWzwyNw5dWY1GuIi5j5C-l9tpYoB4n5_1FXWlL-XF54rCZ02mZ5AeEpBD1l0li-Ljis7F1cfJLrlX9QXWXJxbJxrq_PlR8lyaNe4kwhaW7IqEEfLavMnki_tuWQzgPJyXHLA23LPU0oH5-bZckmK9PhpFB3m7vYk-j9l1YvW9zkm24sn-DWHs0NjcNdk',
   ),

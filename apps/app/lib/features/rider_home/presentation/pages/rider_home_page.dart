@@ -7,7 +7,6 @@ import '../../../../router/route_paths.dart';
 import '../../../auth/presentation/viewmodels/auth_controller.dart';
 import '../../../maps/data/repositories/map_repository_impl.dart';
 import '../../../maps/presentation/widgets/ride_map_widget.dart';
-import '../../../rider_rides/presentation/viewmodels/rides_list_controller.dart';
 import '../../domain/entities/saved_place.dart';
 import '../spec/home_mobile_spec.dart';
 import '../viewmodels/rider_home_controller.dart';
@@ -70,16 +69,13 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage> {
     final walletAsync = ref.watch(walletAccountProvider);
     final profileAsync = ref.watch(riderProfileProvider);
     final savedPlacesAsync = ref.watch(savedPlacesControllerProvider);
-    final ridesAsync = ref.watch(ridesListControllerProvider);
 
     final savedPlaces =
         savedPlacesAsync.valueOrNull ?? const <String, SavedPlaceEntity>{};
     final walletValue = walletAsync.valueOrNull;
     final profileValue = profileAsync.valueOrNull;
 
-    final activeRequest = ridesAsync.valueOrNull
-        ?.where((request) => request.isActive)
-        .firstOrNull;
+    // Home page must not react to active requests (no "active request" banner).
 
     _syncDestinationField(draft.destinationLabel);
 
@@ -134,13 +130,11 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage> {
                     ),
                   ),
                   header: HeaderPill(
-                    locationStatus: 'الالتقاط: ${draft.pickupLabel}',
+                    locationStatus: 'الالتقاط: موقعك الحالي',
                     avatarUrl: profileValue?.avatarUrl,
-                    onRecenterTap: () async {
-                      await ref.read(mapRepositoryProvider).ensureInitialized();
-                    },
                     onPickupTap: controller.openPickupSheet,
-                    onProfileTap: controller.openAccountSheet,
+                    onAvatarTap: controller.openAccountSheet,
+                    onSettingsTap: controller.openAccountSheet,
                   ),
                   marker: RiderMarker(avatarUrl: profileValue?.avatarUrl),
                   mainSheet: HomeMainSheet(
@@ -148,7 +142,6 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage> {
                     homeState: homeState,
                     destinationController: _destinationController,
                     savedPlaces: savedPlaces,
-                    activeRequest: activeRequest,
                     walletLoading: walletAsync.isLoading,
                     profileLoading: profileAsync.isLoading,
                     walletHasError: walletAsync.hasError,
@@ -224,16 +217,9 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage> {
                       }
                       controller.setDestinationLabel(value);
                     },
-                    onOpenActiveRequest: () {
-                      if (activeRequest == null) {
-                        return;
-                      }
-                      context.go(
-                        '${RoutePaths.findingDriver}?requestId=${activeRequest.id}',
-                      );
-                    },
                   ),
                   bottomNav: BottomNavShell(
+                    metrics: metrics,
                     activeTab: HomeBottomTab.home,
                     onTabSelected: (tab) {
                       controller.setBottomTab(tab);

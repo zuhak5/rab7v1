@@ -36,7 +36,10 @@ class RiderShellLayout extends StatelessWidget {
               constraints: const BoxConstraints(
                 maxWidth: HomeMobileSpec.maxContentWidth,
               ),
-              child: header,
+              // Ensure header fills the constrained width.
+              // Without this, shrink-wrapped children can end up inset,
+              // which breaks pixel-accurate alignment.
+              child: SizedBox(width: double.infinity, child: header),
             ),
           ),
         ),
@@ -56,7 +59,8 @@ class RiderShellLayout extends StatelessWidget {
               constraints: const BoxConstraints(
                 maxWidth: HomeMobileSpec.maxContentWidth,
               ),
-              child: mainSheet,
+              // Ensure sheet fills the constrained width.
+              child: SizedBox(width: double.infinity, child: mainSheet),
             ),
           ),
         ),
@@ -69,7 +73,8 @@ class RiderShellLayout extends StatelessWidget {
               constraints: const BoxConstraints(
                 maxWidth: HomeMobileSpec.maxContentWidth,
               ),
-              child: bottomNav,
+              // Ensure bottom nav fills the constrained width.
+              child: SizedBox(width: double.infinity, child: bottomNav),
             ),
           ),
         ),
