@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 /// Centralized, pixel-level tuning knobs for the Rider Home overlay (non-map).
 ///
 /// Purpose
@@ -15,49 +13,48 @@ import 'package:flutter/foundation.dart';
 ///
 /// All values have sensible defaults taken from the current screenshot parity.
 abstract class HomeOverlayTuning {
-  @visibleForTesting
-  static double doubleFromEnv(String key, double fallback) {
-    final raw = const String.fromEnvironment(key, defaultValue: '').trim();
-    final parsed = double.tryParse(raw);
-    return parsed ?? fallback;
-  }
-
   /// Header pill
+  /// Values are sourced from compile-time `--dart-define` entries.
+  ///
+  /// Notes
+  /// - Dart's `*.fromEnvironment()` constructors require a compile-time constant
+  ///   key, so we expose each knob as its own getter.
+  /// - Values must be parseable as a Dart number literal.
   static double get headerAvatarPaddingLeft =>
-      doubleFromEnv('HOME_HEADER_AVATAR_LEFT', 18);
+      const double.fromEnvironment('HOME_HEADER_AVATAR_LEFT', defaultValue: 18);
 
   static double get headerTrailingIconPaddingRight =>
-      doubleFromEnv('HOME_HEADER_ICON_RIGHT', 20);
+      const double.fromEnvironment('HOME_HEADER_ICON_RIGHT', defaultValue: 20);
 
   /// Excludes avatar + trailing icon hit targets from the center tap area.
   static double get headerCenterHitInset =>
-      doubleFromEnv('HOME_HEADER_CENTER_INSET', 84);
+      const double.fromEnvironment('HOME_HEADER_CENTER_INSET', defaultValue: 84);
 
   static double get headerTrailingIconSize =>
-      doubleFromEnv('HOME_HEADER_ICON_SIZE', 22);
+      const double.fromEnvironment('HOME_HEADER_ICON_SIZE', defaultValue: 22);
 
   static double get headerTextSize =>
-      doubleFromEnv('HOME_HEADER_TEXT_SIZE', 18);
+      const double.fromEnvironment('HOME_HEADER_TEXT_SIZE', defaultValue: 18);
 
   /// Bottom navigation
   static double get navBorderAlpha =>
-      doubleFromEnv('HOME_NAV_BORDER_ALPHA', 0.75);
+      const double.fromEnvironment('HOME_NAV_BORDER_ALPHA', defaultValue: 0.75);
 
   static double get navActiveDiscSize =>
-      doubleFromEnv('HOME_NAV_ACTIVE_DISC', 64);
+      const double.fromEnvironment('HOME_NAV_ACTIVE_DISC', defaultValue: 64);
 
   static double get navActiveIconSize =>
-      doubleFromEnv('HOME_NAV_ACTIVE_ICON', 26);
+      const double.fromEnvironment('HOME_NAV_ACTIVE_ICON', defaultValue: 26);
 
   static double get navActiveLift =>
-      doubleFromEnv('HOME_NAV_ACTIVE_LIFT', 20);
+      const double.fromEnvironment('HOME_NAV_ACTIVE_LIFT', defaultValue: 20);
 
   static double get navInactiveIconSize =>
-      doubleFromEnv('HOME_NAV_ICON_SIZE', 26);
+      const double.fromEnvironment('HOME_NAV_ICON_SIZE', defaultValue: 26);
 
   static double get navLabelGap =>
-      doubleFromEnv('HOME_NAV_LABEL_GAP', 2);
+      const double.fromEnvironment('HOME_NAV_LABEL_GAP', defaultValue: 2);
 
   static double get navLabelSize =>
-      doubleFromEnv('HOME_NAV_LABEL_SIZE', 13);
+      const double.fromEnvironment('HOME_NAV_LABEL_SIZE', defaultValue: 13);
 }
